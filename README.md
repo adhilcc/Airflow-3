@@ -19,8 +19,6 @@ The deployment is container-based and consists of:
   * Redis (Celery broker)
   * Dagsync (GitRunner)
 
----
-
 ## 2. Architecture Overview
 
 Airflow 3.x runs as a **fully independent cluster**, including:
@@ -32,8 +30,6 @@ Airflow 3.x runs as a **fully independent cluster**, including:
 
 No state, DB schema, or runtime components are shared with the existing Airflow deployment.
 
----
-
 ## 3. Prerequisites
 
 ### 3.1 Container & Runtime Requirements
@@ -41,8 +37,6 @@ No state, DB schema, or runtime components are shared with the existing Airflow 
 * Docker / container runtime installed
 * Ability to build custom Docker images
 * Internal Docker network allowing container-to-container DNS resolution via links
-
----
 
 ### 3.2 Vault (Secrets Management)
 
@@ -67,8 +61,6 @@ Vault **must be running first**, as all sensitive values are resolved dynamicall
 * `VAULT_ROLE_ID`
 * `VAULT_SECRET_ID`
 * `VAULT_APPROLE`
-
----
 
 ### 3.3 Postgres – Airflow Metadata Database
 
@@ -106,8 +98,6 @@ Recommended SQL (executed as postgres superuser):
 * Postgres must be reachable as `postgres:5432`
 * Schema migrations are executed by Airflow during startup (`airflow db migrate`)
 
----
-
 ### 3.4 Redis – Celery Broker
 
 Redis is used exclusively as the **Celery message broker**.
@@ -129,8 +119,6 @@ Redis must be reachable at:
 redis://<user>:<password>@redis:6379/0
 ```
 
----
-
 ### 3.5 Dagsync (GitRunner)
 
 Dagsync is responsible for synchronizing DAGs into the Airflow environment.
@@ -146,8 +134,6 @@ Dagsync is responsible for synchronizing DAGs into the Airflow environment.
 * `GITRUNNER_RSYNC=1`
 * `GITRUNNER_RSYNC_SECRET`
 * `PRESISTENT_STATE_DIRECTORY=/appz/home/airflow/.rsync_state`
-
----
 
 ### 3.6 Okta (Authentication Prerequisites)
 
@@ -165,8 +151,6 @@ Airflow 3.x integrates with Okta for authentication.
 * `OKTA_API_CLIENT_ID`
 * `OKTA_API_CLIENT_SECRET`
 
----
-
 ### 3.7 Mandatory Airflow Secrets
 
 The following **must exist before startup**:
@@ -174,8 +158,6 @@ The following **must exist before startup**:
 * `AIRFLOW__API_AUTH__JWT_SECRET` (Vault)
 * `AIRFLOW_ADMIN_PASSWORD` (Vault)
 * `AIRFLOW__CORE__FERNET_KEY` (static, consistent across all components)
-
----
 
 ## 4. Installation & Deployment Steps
 
@@ -192,8 +174,6 @@ Containers **must be started in the following order**:
 7. **airflowsch**
 8. **airflowwkr**
 
----
-
 ### 4.2 Build Airflow 3 Base Image
 
 * Build the custom `airflow-3` base image
@@ -204,8 +184,6 @@ Containers **must be started in the following order**:
   * Providers and shared dependencies
 
  The base image is **not run as a container**.
-
----
 
 ### 4.3 Start Airflow Webserver (airflowsvr)
 
@@ -222,8 +200,6 @@ Responsibilities:
 * REST API
 * Authentication (Okta)
 
----
-
 ### 4.4 Start Airflow Scheduler (airflowsch)
 
 * Connects to:
@@ -238,8 +214,6 @@ Responsibilities:
 * Task scheduling
 * Triggering Celery tasks
 
----
-
 ### 4.5 Start Airflow Worker (airflowwkr)
 
 * Connects to:
@@ -252,8 +226,6 @@ Responsibilities:
 
 * Task execution
 * Log generation
-
----
 
 ## 5. Post-Installation Validation
 
