@@ -14,7 +14,6 @@ The deployment is container-based and consists of:
   * `airflowwkr` (Worker)
 * Supporting services:
 
-  * Vault
   * Postgres (metadata DB)
   * Redis (Celery broker)
   * Dagsync (GitRunner)
@@ -38,31 +37,7 @@ No state, DB schema, or runtime components are shared with the existing Airflow 
 * Ability to build custom Docker images
 * Internal Docker network allowing container-to-container DNS resolution via links
 
-### 3.2 Vault (Secrets Management)
-
-Vault **must be running first**, as all sensitive values are resolved dynamically.
-
-**Required Vault Configuration**:
-
-* Vault address reachable at: `https://vault:8200`
-* AppRole authentication enabled
-* Role configured with read access to:
-
-  * Airflow DB password
-  * Redis password
-  * Airflow admin password
-  * JWT secret
-  * Okta client credentials
-  * Rsync secret
-
-**Required Environment Variables (all Airflow containers)**:
-
-* `VAULT_ADDR`
-* `VAULT_ROLE_ID`
-* `VAULT_SECRET_ID`
-* `VAULT_APPROLE`
-
-### 3.3 Postgres – Airflow Metadata Database
+### 3.2 Postgres – Airflow Metadata Database
 
 Postgres runs as a **dedicated container** and hosts the Airflow metadata DB.
 
@@ -72,7 +47,7 @@ Create a dedicated database and user for Airflow 3.x:
 
 * **Database**: `airflow`
 * **User**: `airflow`
-* **Password**: Stored in Vault (`AIRFLOW_POSTGRES_PASSWORD`)
+* **Password**: (`AIRFLOW_POSTGRES_PASSWORD`)
 
 #### 3.3.2 Required Permissions
 
@@ -106,7 +81,6 @@ Redis is used exclusively as the **Celery message broker**.
 
 * Redis version: latest (2.8 protocol compatible)
 * Authentication enabled
-* User and password stored in Vault
 
 **Required Variables**:
 
@@ -127,7 +101,6 @@ Dagsync is responsible for synchronizing DAGs into the Airflow environment.
 
 * Container running and reachable as `gitrunner`
 * Rsync enabled
-* Secret stored in Vault
 
 **Required Variables**:
 
@@ -143,7 +116,7 @@ Airflow 3.x integrates with Okta for authentication.
 
 * Okta application created
 * Redirect URI configured for Airflow webserver
-* Client credentials stored in Vault
+* Client credentials
 
 **Required Environment Variables (Webserver)**:
 
@@ -155,8 +128,8 @@ Airflow 3.x integrates with Okta for authentication.
 
 The following **must exist before startup**:
 
-* `AIRFLOW__API_AUTH__JWT_SECRET` (Vault)
-* `AIRFLOW_ADMIN_PASSWORD` (Vault)
+* `AIRFLOW__API_AUTH__JWT_SECRET`
+* `AIRFLOW_ADMIN_PASSWORD` 
 * `AIRFLOW__CORE__FERNET_KEY` (static, consistent across all components)
 
 ## 4. Installation & Deployment Steps
@@ -165,14 +138,13 @@ The following **must exist before startup**:
 
 Containers **must be started in the following order**:
 
-1. **Vault**
-2. **Postgres**
-3. **Redis**
-4. **Dagsync (GitRunner)**
-5. **airflow-3 (Base Image – build only)**
-6. **airflowsvr**
-7. **airflowsch**
-8. **airflowwkr**
+1. **Postgres**
+2. **Redis**
+3. **Dagsync (GitRunner)**
+4. **airflow-3 (Base Image – build only)**
+5. **airflowsvr**
+6. **airflowsch**
+7. **airflowwkr**
 
 ### 4.2 Build Airflow 3 Base Image
 
